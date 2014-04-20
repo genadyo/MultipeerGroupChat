@@ -51,9 +51,10 @@
 #import "SessionContainer.h"
 #import "Transcript.h"
 
-@interface SessionContainer()
-// Framework UI class for handling incoming invitations
-@property (retain, nonatomic) MCAdvertiserAssistant *advertiserAssistant;
+@interface SessionContainer() <MCNearbyServiceBrowserDelegate, MCNearbyServiceAdvertiserDelegate>
+// Framework class for handling incoming/outgoing invitations
+@property (strong, nonatomic) MCNearbyServiceAdvertiser *advertiser;
+@property (strong, nonatomic) MCNearbyServiceBrowser *browser;
 @end
 
 @implementation SessionContainer
@@ -68,10 +69,14 @@
         _session = [[MCSession alloc] initWithPeer:peerID securityIdentity:nil encryptionPreference:MCEncryptionRequired];
         // Set ourselves as the MCSessionDelegate
         _session.delegate = self;
-        // Create the advertiser assistant for managing incoming invitation
-        _advertiserAssistant = [[MCAdvertiserAssistant alloc] initWithServiceType:serviceType discoveryInfo:nil session:_session];
-        // Start the assistant to begin advertising your peers availability
-        [_advertiserAssistant start];
+        // Create the advertiser/browser for managing incoming invitation
+        _advertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer:peerID discoveryInfo:nil serviceType:serviceType];
+        _advertiser.delegate = self;
+        _browser = [[MCNearbyServiceBrowser alloc] initWithPeer:peerID serviceType:serviceType];
+        _browser.delegate = self;
+        // Start the advertiser/browser to begin advertising your peers availability
+        [_advertiser startAdvertisingPeer];
+        [_browser startBrowsingForPeers];
     }
     return self;
 }
@@ -79,7 +84,8 @@
 // On dealloc we should clean up the session by disconnecting from it.
 - (void)dealloc
 {
-    [_advertiserAssistant stop];
+    [_browser stopBrowsingForPeers];
+    [_advertiser stopAdvertisingPeer];
     [_session disconnect];
 }
 
@@ -214,6 +220,40 @@
 - (void)session:(MCSession *)session didReceiveStream:(NSInputStream *)stream withName:(NSString *)streamName fromPeer:(MCPeerID *)peerID
 {
     NSLog(@"Received data over stream with name %@ from peer %@", streamName, peerID.displayName);
+}
+
+#pragma mark - MCNearbyServiceBrowserDelegate methods
+
+- (void)browser:(MCNearbyServiceBrowser *)browser didNotStartBrowsingForPeers:(NSError *)error
+{
+    NSLog(@"didNotStartBrowsingForPeers: %@", error);
+}
+
+- (void)browser:(MCNearbyServiceBrowser *)browser foundPeer:(MCPeerID *)peerID withDiscoveryInfo:(NSDictionary *)info
+{
+    NSLog(@"foundPeer: %@", peerID.displayName);
+    if (([_session.myPeerID.displayName compare:peerID.displayName] == NSOrderedDescending)) {
+        NSLog(@"invitePeer: %@", peerID.displayName);
+        [browser invitePeer:peerID toSession:_session withContext:nil timeout:30.0];
+    }
+}
+
+- (void)browser:(MCNearbyServiceBrowser *)browser lostPeer:(MCPeerID *)peerID
+{
+    NSLog(@"lostPeer: %@", peerID.displayName);
+}
+
+#pragma mark - MCNearbyServiceAdvertiserDelegate methods
+
+- (void)advertiser:(MCNearbyServiceAdvertiser *)advertiser didNotStartAdvertisingPeer:(NSError *)error
+{
+    NSLog(@"didNotStartAdvertisingPeer: %@", error);
+}
+
+- (void)advertiser:(MCNearbyServiceAdvertiser *)advertiser didReceiveInvitationFromPeer:(MCPeerID *)peerID withContext:(NSData *)context invitationHandler:(void (^)(BOOL, MCSession *))invitationHandler
+{
+    NSLog(@"didReceiveInvitationFromPeer: %@", peerID.displayName);
+    invitationHandler(YES, _session);
 }
 
 @end
