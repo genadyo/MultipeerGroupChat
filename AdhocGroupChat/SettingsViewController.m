@@ -51,7 +51,7 @@
 
 #import "SettingsViewController.h"
 
-static NSUInteger const MCNearbyServiceMaxServiceTypeLength = 15;
+//static NSUInteger const MCNearbyServiceMaxServiceTypeLength = 15;
 
 @interface SettingsViewController () <UITextFieldDelegate>
 

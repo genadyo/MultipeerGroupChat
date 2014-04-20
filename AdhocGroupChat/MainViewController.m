@@ -133,7 +133,12 @@ NSString * const kNSDefaultServiceType = @"serviceTypeKey";
         viewController.displayName = self.displayName;
         viewController.serviceType = self.serviceType;
     }
-} 
+}
+
+- (IBAction)roomCreate:(id)sender
+{
+    [self performSegueWithIdentifier:@"Room Create" sender:self];
+}
 
 #pragma mark - SettingsViewControllerDelegate methods
 
@@ -342,6 +347,10 @@ NSString * const kNSDefaultServiceType = @"serviceTypeKey";
 // Override this method to know if user wants to take a new photo or select from the photo library
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
+    if (buttonIndex == 2) {
+        return;
+    }
+    
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
 
     if (imagePicker) {
