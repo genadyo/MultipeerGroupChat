@@ -180,11 +180,6 @@
                         </barButtonItem>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="CQr-ik-YQF">
-                        <barButtonItem key="leftBarButtonItem" systemItem="search" id="MeR-uq-xUn">
-                            <connections>
-                                <action selector="browseForPeers:" destination="p9r-Z3-7FD" id="YLn-Pb-zYM"/>
-                            </connections>
-                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" id="fu8-5o-ZrU">
                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="infoLight" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" id="M1u-YB-eDx">
                                 <rect key="frame" x="282" y="11" width="22" height="22"/>

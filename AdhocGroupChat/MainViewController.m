@@ -61,7 +61,7 @@
 NSString * const kNSDefaultDisplayName = @"displayNameKey";
 NSString * const kNSDefaultServiceType = @"serviceTypeKey";
 
-@interface MainViewController () <MCBrowserViewControllerDelegate, SettingsViewControllerDelegate, UITextFieldDelegate, SessionContainerDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface MainViewController () <SettingsViewControllerDelegate, UITextFieldDelegate, SessionContainerDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
 // Display name for local MCPeerID
 @property (copy, nonatomic) NSString *displayName;
@@ -163,26 +163,6 @@ NSString * const kNSDefaultServiceType = @"serviceTypeKey";
 
     // Create the session
     [self createSession];
-}
-
-#pragma mark - MCBrowserViewControllerDelegate methods
-
-// Override this method to filter out peers based on application specific needs
-- (BOOL)browserViewController:(MCBrowserViewController *)browserViewController shouldPresentNearbyPeer:(MCPeerID *)peerID withDiscoveryInfo:(NSDictionary *)info
-{
-    return YES;
-}
-
-// Override this to know when the user has pressed the "done" button in the MCBrowserViewController
-- (void)browserViewControllerDidFinish:(MCBrowserViewController *)browserViewController
-{
-    [browserViewController dismissViewControllerAnimated:YES completion:nil];
-}
-
-// Override this to know when the user has pressed the "cancel" button in the MCBrowserViewController
-- (void)browserViewControllerWasCancelled:(MCBrowserViewController *)browserViewController
-{
-    [browserViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - SessionContainerDelegate
@@ -309,21 +289,6 @@ NSString * const kNSDefaultServiceType = @"serviceTypeKey";
 }
 
 #pragma mark - IBAction methods
-
-// Action method when pressing the "browse" (search icon).  It presents the MCBrowserViewController: a framework UI which enables users to invite and connect to other peers with the same room name (aka service type).
-- (IBAction)browseForPeers:(id)sender
-{
-    NSLog(@"%s", __PRETTY_FUNCTION__);
-    
-    // Instantiate and present the MCBrowserViewController
-    MCBrowserViewController *browserViewController = [[MCBrowserViewController alloc] initWithServiceType:self.serviceType session:self.sessionContainer.session];
-                                                      
-	browserViewController.delegate = self;
-    browserViewController.minimumNumberOfPeers = kMCSessionMinimumNumberOfPeers;
-    browserViewController.maximumNumberOfPeers = kMCSessionMaximumNumberOfPeers;
-
-    [self presentViewController:browserViewController animated:YES completion:nil];
-}
 
 // Action method when user presses "send"
 - (IBAction)sendMessageTapped:(id)sender
